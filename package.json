@@ -1,0 +1,36 @@
+{
+  "name": "@ores-truffle-oreslang/html-js-css-syntax-highlighter",
+  "version": "0.1.0",
+  "description": "Small dependency-free syntax highlighter with pluggable language grammars and template-engine adapters.",
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./plugins/oreslang": {
+      "types": "./src/plugins/oreslang.d.ts",
+      "import": "./src/plugins/oreslang.js"
+    },
+    "./adapters/astro": {
+      "types": "./src/adapters/astro.d.ts",
+      "import": "./src/adapters/astro.js"
+    }
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check src/core.js && node --check src/index.js && node --check src/plugins/oreslang.js && node --check src/plugins/html.js && node --check src/plugins/css.js && node --check src/plugins/javascript.js && node --check src/plugins/astro.js && node --check src/adapters/astro.js",
+    "ci": "npm run check && npm test"
+  },
+  "keywords": [
+    "syntax-highlighting",
+    "oreslang",
+    "astro",
+    "html",
+    "css",
+    "javascript"
+  ],
+  "license": "MIT"
+}
