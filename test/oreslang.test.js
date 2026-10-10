@@ -17,9 +17,18 @@ test("Oreslang marks over and end as keywords", () => {
   const html = highlight(sample, "oreslang");
 
   assert.match(html, /<span class="tok-keyword">over<\/span>/);
+  assert.match(html, /<span class="tok-keyword">structural<\/span>/);
   assert.match(html, /<span class="tok-keyword">end<\/span>/);
   assert.match(html, /<span class="tok-keyword">match<\/span>/);
   assert.match(html, /<span class="tok-keyword">on<\/span>/);
+});
+
+test("static fnc is highlighted, without matching keyword prefixes inside identifiers", () => {
+  const html = highlight("static fnc build(): void { return; }", "oreslang");
+  assert.match(html, /<span class="tok-keyword">static<\/span>/);
+  assert.match(html, /<span class="tok-keyword">fnc<\/span>/);
+  const identifiers = highlight("overlap structuralize statician", "oreslang");
+  assert.ok(!identifiers.includes('class="tok-keyword"'));
 });
 
 test("highlighting escapes raw HTML before rendering", () => {
