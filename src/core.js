@@ -16,10 +16,15 @@ export function createRegexLanguage({ id, aliases = [], tokens }) {
     throw new TypeError("createRegexLanguage requires an id and at least one token rule");
   }
 
-  const expression = new RegExp(
-    tokens.map(({ pattern }, index) => `(?<t${index}>${sourceOf(pattern)})`).join("|"),
-    "gmu",
-  );
+  // Flags such as /i and /s belong to each rule. Combining only .source
+  // into one expression discarded them (or would make every rule insensitive).
+  const rules = tokens.map((rule) => ({
+    rule,
+    expression: new RegExp(sourceOf(rule.pattern),
+      `gm${rule.pattern instanceof RegExp && rule.pattern.unicodeSets ? 'v' : 'u'}`
+      + (rule.pattern instanceof RegExp && rule.pattern.ignoreCase ? 'i' : '')
+      + (rule.pattern instanceof RegExp && rule.pattern.dotAll ? 's' : '')),
+  }));
 
   return {
     kind: "language",
@@ -30,25 +35,35 @@ export function createRegexLanguage({ id, aliases = [], tokens }) {
       const output = [];
       let cursor = 0;
 
-      expression.lastIndex = 0;
-
-      for (const match of value.matchAll(expression)) {
-        const index = match.index ?? 0;
-
-        if (index > cursor) {
-          output.push({ kind: "plain", value: value.slice(cursor, index) });
+      function nextMatch(entry, at) {
+        entry.expression.lastIndex = at;
+        let match = entry.expression.exec(value);
+        // A token must consume source bytes. Skip zero-width matches while
+        // advancing over complete Unicode scalars, never an infinite exec loop.
+        while (match && match[0].length === 0) {
+          entry.expression.lastIndex = match.index
+            + (value.codePointAt(match.index) > 0xffff ? 2 : 1);
+          match = entry.expression.exec(value);
         }
-
-        const group = Object.entries(match.groups ?? {}).find(([, part]) => part !== undefined);
-        const tokenIndex = group ? Number(group[0].slice(1)) : -1;
-        const rule = tokens[tokenIndex];
-
-        output.push({
-          kind: rule?.kind ?? "plain",
-          value: match[0],
-        });
-
+        return match;
+      }
+      const matches = rules.map(entry => nextMatch(entry, 0));
+      while (true) {
+        let chosen = -1;
+        for (let i = 0; i < matches.length; i++) {
+          if (matches[i] && (chosen < 0 || matches[i].index < matches[chosen].index)) {
+            chosen = i;
+          }
+        }
+        if (chosen < 0) break;
+        const match = matches[chosen];
+        const index = match.index;
+        if (index > cursor) output.push({ kind: 'plain', value: value.slice(cursor, index) });
+        output.push({ kind: rules[chosen].rule.kind ?? 'plain', value: match[0] });
         cursor = index + match[0].length;
+        for (let i = 0; i < matches.length; i++) {
+          if (matches[i] && matches[i].index < cursor) matches[i] = nextMatch(rules[i], cursor);
+        }
       }
 
       if (cursor < value.length) {
