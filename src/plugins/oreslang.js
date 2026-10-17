@@ -14,7 +14,7 @@ export const oreslang = createRegexLanguage({
     { kind: "boolean", pattern: /\b(?:true|false)\b/ },
     { kind: "type", pattern: /\b(?:String|string|Int|int|Bool|bool|Float|float|Future|ActorRef|Option|Result|Tuple|Map|List|Set|Symbol|void)\b/ },
     { kind: "symbol", pattern: /@[A-Za-z_]\w*|\b[A-Z][A-Za-z0-9_]*\b/ },
-    { kind: "operator", pattern: /\.\.\.|->|=>|::|:=|==|!=|<=|>=|\|\||&&|\^\^|<>|[=+\-*\/%<>!?&|]/ },
+    { kind: "operator", pattern: /\b(?:and|or)\b|\.\.\.|->|=>|::|:=|==|!=|<=|>=|\|\||&&|\^\^|<>|[=+\-*\/%<>!?&|]/ },
     { kind: "punctuation", pattern: /[{}()[\],;:.]/ },
   ],
 });
