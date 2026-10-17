@@ -60,3 +60,11 @@ test("logical word and equality operators are highlighted as keywords", () => {
   assert.ok(!capitalized.includes('<span class="tok-keyword">And</span>'));
   assert.ok(!capitalized.includes('<span class="tok-keyword">Or</span>'));
 });
+
+test("xor keyword is highlighted independently from capitalized Xor builtin", () => {
+  const html = highlight("return left xor right ^^ extra;", "oreslang");
+  assert.match(html, /<span class="tok-keyword">xor<\\/span>/);
+  assert.match(html, /<span class="tok-operator">\\^\\^<\\/span>/);
+  const builtin = highlight("Xor(true, false)", "oreslang");
+  assert.ok(!builtin.includes('<span class="tok-keyword">Xor</span>'));
+});
