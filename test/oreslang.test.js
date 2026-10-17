@@ -50,3 +50,13 @@ test("Astro adapter returns set:html-ready markup", () => {
 test("unknown languages fail loudly", () => {
   assert.throws(() => highlight("x", "not-a-language"), /unknown language/);
 });
+
+test("logical word and equality operators are highlighted as keywords", () => {
+  const html = highlight("return a and b or (a eq b) and (a neq c);", "oreslang");
+  for (const word of ["and", "or", "eq", "neq"]) {
+    assert.match(html, new RegExp('<span class="tok-keyword">' + word + '<\\/span>'));
+  }
+  const capitalized = highlight("And Or Xor", "oreslang");
+  assert.ok(!capitalized.includes('<span class="tok-keyword">And</span>'));
+  assert.ok(!capitalized.includes('<span class="tok-keyword">Or</span>'));
+});
