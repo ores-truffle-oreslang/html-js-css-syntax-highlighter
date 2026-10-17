@@ -31,6 +31,15 @@ test("static fnc is highlighted, without matching keyword prefixes inside identi
   assert.ok(!identifiers.includes('class="tok-keyword"'));
 });
 
+test("logical and/or words are highlighted as operators without matching identifier substrings", () => {
+  const html = highlight("return ready and healthy or fallback;", "oreslang");
+  assert.match(html, /<span class="tok-operator">and<\/span>/);
+  assert.match(html, /<span class="tok-operator">or<\/span>/);
+
+  const identifiers = highlight("candy oracle android", "oreslang");
+  assert.ok(!identifiers.includes('class="tok-operator"'));
+});
+
 test("highlighting escapes raw HTML before rendering", () => {
   const html = highlight(`const x = "<script>alert(1)</script>";`, "oreslang");
   assert.ok(!html.includes("<script>"));
