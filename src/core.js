@@ -111,10 +111,19 @@ export class SyntaxHighlighter {
         throw new TypeError(`language plugin "${plugin.id}" must provide tokenize(code)`);
       }
 
-      this.#languages.set(plugin.id, plugin);
-      for (const alias of plugin.aliases ?? []) {
-        this.#languages.set(alias, plugin);
+      // Fail closed on conflicting IDs/aliases: a later plugin must not
+      // silently replace the grammar already trusted for a language.
+      const names = [plugin.id, ...(plugin.aliases ?? [])];
+      if (names.some(name => typeof name !== "string" || name.length === 0)) {
+        throw new TypeError("language ids and aliases must be non-empty strings");
       }
+      for (const name of names) {
+        const previous = this.#languages.get(name);
+        if (previous && previous !== plugin) {
+          throw new Error(`language registration conflict: ${name}`);
+        }
+      }
+      for (const name of names) this.#languages.set(name, plugin);
       return this;
     }
 
