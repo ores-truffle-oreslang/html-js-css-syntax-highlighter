@@ -13,15 +13,15 @@ const baseGrammar = createRegexLanguage({
     { kind: "runtimeGlobal", pattern: /\b(?:recover|defer|throw|raise)\b/ },
     {
       kind: "keyword",
-      pattern: /\b(?:define|actor|isolated|shared|private|untrusted|critical|suspends|gen|namespace|module|class|trait|struct|interface|contract|requires|pub|static|fnc|routine|async|await|return|const|mut|val|let|infer|match|over|structural|on|switch|case|select|when|do|done|end|nb|readch|writech|spawn|and|or|as|with|if|fi|else|while|for|of|break|continue|yield|try|catch|finally|loop|block|new|extends|implements|super|default|import|from|type|stop|pure|trap|nlex|gpu|quantum|cancelled|timeout)\b/,
+      pattern: /\b(?:define|actor|isoactor|isolated|shared|private|untrusted|critical|suspends|gen|namespace|module|class|trait|struct|interface|contract|requires|pub|static|fnc|routine|async|await|return|const|mut|val|let|infer|match|over|structural|on|switch|case|select|when|do|done|end|nb|readch|writech|spawn|and|or|as|with|if|fi|else|import|from|type|stop|recover|defer|pure|trap|nlex|cpu|gpu|quantum|panic|null|cancelled|timeout|abstract|arr|block|break|catch|cb|conforms|continue|def|default|elif|elseif|extends|finally|for|generator|impl|implements|loop|matches|new|obj|of|rt|self|super|then|try|typeof|types|while|yield)\b/,
     },
     { kind: "boolean", pattern: /\b(?:true|false)\b/ },
     { kind: "type", pattern: /\b(?:String|string|Int|int|Bool|bool|Float|float|Future|ActorRef|Option|Result|Tuple|Map|List|Set|Symbol|void)\b/ },
     // Hash-prefixed Symbol literals are distinct from annotations and strings.
     { kind: "symbol", pattern: /#[A-Za-z_][A-Za-z0-9_]*|@[A-Za-z_]\w*|\b[A-Z][A-Za-z0-9_]*\b/ },
-    // These comparison words are contextual; a binding named "eq" stays plain.
-    { kind: "operator", pattern: /(?<=[A-Za-z0-9_)]\s+)(?:eq|neq|is)\b(?=\s+[A-Za-z0-9_(])/ },
-    { kind: "operator", pattern: /\b(?:and|or)\b|\.\.\.|->|=>|::|:=|==|!=|<=|>=|\|\||&&|<>|[=+\-*\/<>!?&|]/ },
+    // The pinned compiler lexer reserves eq/neq/is (not valid binding identifiers).
+    { kind: "operator", pattern: /\b(?:eq|neq|is)\b/ },
+    { kind: "operator", pattern: /\b(?:and|or)\b|\.\.\.|->|=>|::|:=|==|!=|<=|>=|\|\||&&|<>|[=+\-*\/<>!?&|%^]/ },
     { kind: "punctuation", pattern: /[{}()[\],;:.]/ },
   ],
 });

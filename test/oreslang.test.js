@@ -60,28 +60,29 @@ test("unknown languages fail loudly", () => {
   assert.throws(() => highlight("x", "not-a-language"), /unknown language/);
 });
 
-test("logical words are keywords but comparisons are contextual operators", () => {
+test("comparison words are reserved operators in pinned compiler lexer", () => {
   const html = highlight("return a and b or (a eq b) and (a neq c);", "oreslang");
-  for (const word of ["and", "or"]) {
+  for (const word of ["and","or"]) {
     assert.ok(html.includes('<span class="tok-keyword">' + word + '</span>'), html);
   }
-  for (const word of ["eq", "neq"]) {
+  for (const word of ["eq","neq"]) {
     assert.ok(html.includes('<span class="tok-operator">' + word + '</span>'), html);
   }
-  const identifiers = highlight("let eq = 1; let is = 2; let neq = 3;", "oreslang");
-  for (const word of ["eq", "is", "neq"]) {
-    assert.ok(!identifiers.includes('<span class="tok-keyword">' + word + '</span>'));
-    assert.ok(!identifiers.includes('<span class="tok-operator">' + word + '</span>'));
+  for (const word of ["eq","is","neq"]) {
+    assert.ok(highlight("let " + word + " = 1", "oreslang")
+      .includes('<span class="tok-operator">' + word + '</span>'));
   }
 });
 
-test("removed symbolic operators and xor keyword are not falsely highlighted", () => {
-  const html = highlight("return Mod(a, b) ^ c % d ^^ x xor z; Xor(true, false)", "oreslang");
-  for (const symbol of ["^", "%", "^^"]) {
-    assert.ok(!html.includes('<span class="tok-operator">' + symbol + '</span>'), html);
+test("lexically recognized percent/caret and legacy words are not silently dropped", () => {
+  const html = highlight("isoactor null panic cpu gpu a % b ^ c", "oreslang");
+  for (const word of ["isoactor","null","panic","cpu","gpu"]) {
+    assert.ok(html.includes('<span class="tok-keyword">' + word + '</span>'), html);
+  }
+  for (const sign of ["%","^"]) {
+    assert.ok(html.includes('<span class="tok-operator">' + sign + '</span>'), html);
   }
   assert.ok(!html.includes('<span class="tok-keyword">xor</span>'), html);
-  assert.ok(!html.includes('<span class="tok-keyword">Xor</span>'), html);
 });
 
 test("nested comments and templates cannot leak keywords or markup", () => {

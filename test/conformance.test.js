@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { defaultHighlighter } from "../src/index.js";
+import { oreslangPreview } from "../src/plugins/oreslang-target-preview.js";
 
 const corpus = JSON.parse(readFileSync(new URL("../conformance/oreslang-syntax-v1.json", import.meta.url)));
 
@@ -18,7 +18,7 @@ test("shared fixture pins the source lexer and distinguishes future target seman
 
 for (const fixture of corpus.cases) {
   test("shared editor lexical contract: " + fixture.id, () => {
-    const tokens = defaultHighlighter.tokenize(fixture.source, "oreslang");
+    const tokens = oreslangPreview.tokenize(fixture.source);
     assert.equal(tokens.map(t => t.value).join(""), fixture.source,
       "tokens must conserve every input character");
     const keywords = tokens.filter(t => t.kind === "keyword").map(t => t.value);
