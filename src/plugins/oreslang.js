@@ -15,7 +15,7 @@ const baseGrammar = createRegexLanguage({
     { kind: "type", pattern: /\b(?:String|string|Int|int|Bool|bool|Float|float|Future|ActorRef|Option|Result|Tuple|Map|List|Set|Symbol|void)\b/ },
     { kind: "symbol", pattern: /@[A-Za-z_]\w*|\b[A-Z][A-Za-z0-9_]*\b/ },
     // These comparison words are contextual; a binding named "eq" stays plain.
-    { kind: "operator", pattern: /(?<=[A-Za-z0-9_)\]\}]\s+)(?:eq|neq|is)\b(?=\s+(?:[A-Za-z0-9_([{'"\`]))/ },
+    { kind: "operator", pattern: /(?<=[A-Za-z0-9_)]\s+)(?:eq|neq|is)\b(?=\s+[A-Za-z0-9_(])/ },
     { kind: "operator", pattern: /\b(?:and|or)\b|\.\.\.|->|=>|::|:=|==|!=|<=|>=|\|\||&&|<>|[=+\-*\/<>!?&|]/ },
     { kind: "punctuation", pattern: /[{}()[\],;:.]/ },
   ],
