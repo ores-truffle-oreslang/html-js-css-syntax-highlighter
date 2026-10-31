@@ -1,0 +1,69 @@
+{
+  "schema": "oreslang-lexical-backend-admission-v1",
+  "status": "test-plan-not-backend-execution-evidence",
+  "corpusPath": "contracts/editor-syntax/v1/compiler-lexical-differential-v1.tsv",
+  "corpusBlobSha": "eeed64b7d33c262b35120662386435575982a9bc",
+  "expectedCases": 34,
+  "dimensions": [
+    "lexer",
+    "parser",
+    "runtime"
+  ],
+  "backends": [
+    {
+      "id": "java",
+      "lexer": "NOT_EXECUTED",
+      "parser": "NOT_EXECUTED",
+      "runtime": "NOT_EXECUTED",
+      "testedHead": null,
+      "runUrl": null,
+      "executedSteps": 0,
+      "executedCases": 0,
+      "receiptSha256": null
+    },
+    {
+      "id": "llvm",
+      "lexer": "NOT_EXECUTED",
+      "parser": "NOT_EXECUTED",
+      "runtime": "NOT_EXECUTED",
+      "testedHead": null,
+      "runUrl": null,
+      "executedSteps": 0,
+      "executedCases": 0,
+      "receiptSha256": null
+    },
+    {
+      "id": "wasm",
+      "lexer": "NOT_EXECUTED",
+      "parser": "NOT_EXECUTED",
+      "runtime": "NOT_EXECUTED",
+      "testedHead": null,
+      "runUrl": null,
+      "executedSteps": 0,
+      "executedCases": 0,
+      "receiptSha256": null
+    },
+    {
+      "id": "net",
+      "lexer": "NOT_EXECUTED",
+      "parser": "NOT_EXECUTED",
+      "runtime": "NOT_EXECUTED",
+      "testedHead": null,
+      "runUrl": null,
+      "executedSteps": 0,
+      "executedCases": 0,
+      "receiptSha256": null
+    },
+    {
+      "id": "forge",
+      "lexer": "NOT_EXECUTED",
+      "parser": "NOT_EXECUTED",
+      "runtime": "NOT_EXECUTED",
+      "testedHead": null,
+      "runUrl": null,
+      "executedSteps": 0,
+      "executedCases": 0,
+      "receiptSha256": null
+    }
+  ]
+}
