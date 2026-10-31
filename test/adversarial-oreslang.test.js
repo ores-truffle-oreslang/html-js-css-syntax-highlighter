@@ -45,9 +45,9 @@ test("deterministic adversarial literal/comment combinations preserve source and
   for(let i=0;i<384;i++){
     seed=(Math.imul(seed,1664525)+1013904223)>>>0;
     const depth=1+(seed%19);
-    const quoted=seed&1 ? '#"raise \\\\" escaped"' : "#'throw with spaces'";
+    const quoted=seed&1 ? '#"raise \\" escaped"' : "#'throw with spaces'";
     const source="/*".repeat(depth)+" return throw #ready "+"*/".repeat(depth)+
-       " "+quoted+' "recover" '+String.raw`defer`+' return';
+       " "+quoted+' "recover" '+"\`defer\`"+' return';
     const tokens=tokensOf(source);
     assert.equal(reconstruction(tokens),source,i);
     assert.equal(tokens.filter(t=>t.kind==="keyword" && t.value==="return").length,1,i);
