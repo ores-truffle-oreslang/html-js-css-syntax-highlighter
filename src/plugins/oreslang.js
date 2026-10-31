@@ -26,6 +26,20 @@ const baseGrammar = createRegexLanguage({
   ],
 });
 
+function sourceHasInvalidUtf16OrNul(source) {
+  for (let i = 0; i < source.length; i++) {
+    const point = source.charCodeAt(i);
+    if (point === 0) return true;
+    if (point >= 0xd800 && point <= 0xdbff) {
+      const low = source.charCodeAt(++i);
+      if (!(low >= 0xdc00 && low <= 0xdfff)) return true;
+    } else if (point >= 0xdc00 && point <= 0xdfff) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Mirrors the pinned Java lexer/OresSymbol's strict literal admission for
 // highlighting only. Parser/typechecking still require compiler execution.
 function validSymbolName(value) {
@@ -90,6 +104,12 @@ export const oreslang = {
   ...baseGrammar,
   tokenize(input) {
     const source = String(input);
+    // The native lexer rejects these malformed host strings even inside
+    // otherwise opaque comments/templates. Preserve source losslessly, but
+    // never present it as valid program or Symbol syntax.
+    if (sourceHasInvalidUtf16OrNul(source)) {
+      return [{kind: 'plain', value: source}];
+    }
     const output = [];
     let cursor = 0;
     let codeStart = 0;
