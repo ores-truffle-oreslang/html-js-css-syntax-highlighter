@@ -104,3 +104,7 @@ GitHub requests are a reliable drift oracle. The scheduled public watcher
 was removed. Private compiler-side lexical/parser evidence is staged
 separately in oreslang-source.java PR #2350; it has no executed CI steps.
 Merge requires independent review and authentic compiler-backed evidence.
+
+## Browser DOM security gate
+
+`browser/browser-smoke.mjs` is a separate Chromium/Playwright CI job exercising real DOM parsing rather than regex-only markup assertions. It requires `npm install --ignore-scripts`, `npx playwright install --with-deps chromium`, and `node browser/browser-smoke.mjs`. The test checks HTML entity roundtrips, absence of active injected elements, and escaped hostile `classPrefix` attributes. It does not prove a compiler build or all browser engines.
