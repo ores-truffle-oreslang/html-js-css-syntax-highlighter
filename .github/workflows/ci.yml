@@ -22,6 +22,8 @@ jobs:
         with:
           node-version: "22.20.0"
       - run: npm run ci
+      - name: Validate compiler source pins offline
+        run: node scripts/check-upstream-syntax.mjs
 
   grammar-drift:
     if: github.event_name == 'schedule'
