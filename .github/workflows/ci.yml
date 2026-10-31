@@ -19,6 +19,11 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "22.20.0"
+      - name: Execute exact common-source lexical validator
+        run: |
+          test "$(git hash-object contracts/editor-syntax/v1/editor-lexical-contract.json)" = e9dbf3b6fad5562b7ca6df631ab3c45f478480ba
+          test "$(git hash-object tests/verify-editor-lexical-v1.mjs)" = 336d5429af432ff78bb4012acb35b3f2109a4e3b
+          node --test tests/verify-editor-lexical-v1.mjs
       - run: npm run ci
       - name: Validate compiler source pins offline
         run: node scripts/check-upstream-syntax.mjs

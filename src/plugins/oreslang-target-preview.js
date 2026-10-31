@@ -68,10 +68,21 @@ export const oreslangPreview = {
         kind = 'symbol';
         const quote = source[cursor + 1];
         cursor += 2;
+        let closed = false;
         while (cursor < source.length) {
-          if (source[cursor] === '\\') { cursor += Math.min(2, source.length - cursor); continue; }
-          if (source[cursor++] === quote) break;
+          // Quoted Symbol names cannot cross a line boundary. Never consume
+          // the next line of code as part of a malformed quoted Symbol.
+          if (source[cursor] === '\n' || source[cursor] === '\r') break;
+          if (source[cursor] === '\\') {
+            if (source[cursor + 1] === '\n' || source[cursor + 1] === '\r') break;
+            cursor += Math.min(2, source.length - cursor);
+            continue;
+          }
+          if (source[cursor++] === quote) { closed = true; break; }
         }
+        // The renderer escapes plain text too; an incomplete Symbol must
+        // never be presented as a valid atomic Symbol literal.
+        if (!closed) kind = 'plain';
       } else if (source[cursor] === '"' || source[cursor] === "'" || source[cursor] === '`') {
         kind = 'string';
         const quote = source[cursor++];
