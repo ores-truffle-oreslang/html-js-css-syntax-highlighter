@@ -42,7 +42,7 @@ jobs:
         with:
           node-version: "22.20.0"
       - name: Install pinned Playwright dependency
-        run: npm install --ignore-scripts --no-audit --no-fund
+        run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Install Chromium for real browser execution
         run: npx playwright install --with-deps chromium
       - name: Render untrusted Oreslang in Chromium and verify DOM safety
@@ -60,14 +60,8 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "22.20.0"
+      - name: Install exact public dependencies from committed lockfile
+        run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Build two byte-identical npm release archives and import extracted package
         run: npm run pack:verify
 
-      - name: Generate temporary public dependency lockfile receipt
-        run: |
-          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-          test -f package-lock.json
-          echo 'BEGIN_ORESLANG_PUBLIC_NPM_LOCK_BASE64'
-          base64 -w 0 package-lock.json
-          echo
-          echo 'END_ORESLANG_PUBLIC_NPM_LOCK_BASE64'
