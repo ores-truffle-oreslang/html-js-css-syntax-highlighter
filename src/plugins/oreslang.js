@@ -144,7 +144,14 @@ export const oreslang = {
         cursor += 2;
         let depth = 1;
         while (cursor < source.length && depth > 0) {
-          if (source.startsWith('/*', cursor)) { depth++; cursor += 2; }
+          if (source.startsWith('/*', cursor)) {
+            if (++depth > 4_096) {
+              // Match the bounded native lexer: do not color the remainder
+              // as valid code after an excessive nesting depth.
+              return [{kind: 'plain', value: source}];
+            }
+            cursor += 2;
+          }
           else if (source.startsWith('*/', cursor)) { depth--; cursor += 2; }
           else cursor++;
         }
