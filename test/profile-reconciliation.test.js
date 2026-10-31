@@ -1,10 +1,11 @@
 
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const crypto = require('node:crypto');
-const root = path.resolve(__dirname, '..');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import {fileURLToPath} from 'node:url';
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const contractPath = path.join(root,'contracts/editor-syntax/v1/editor-lexical-contract.json');
 const proposalPath = path.join(root,'conformance/oreslang-syntax-v1.json');
 const bridgePath = path.join(root,'contracts/editor-syntax/v1/profile-reconciliation.json');
