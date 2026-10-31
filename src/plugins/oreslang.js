@@ -7,13 +7,13 @@ const baseGrammar = createRegexLanguage({
     { kind: "comment", pattern: /\/\/[^\n]*|\/\*[\s\S]*?\*\// },
     { kind: "string", pattern: /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`/ },
     { kind: "number", pattern: /\b\d+(?:\.\d+)?(?:ns|us|ms|s|m|h)?\b/ },
+    // Compound keywords are recognized as a unit; none of these spellings
+    // should be broken into two unrelated identifiers around the hyphen.
+    { kind: "keyword", pattern: /\b(?:critical-read|critical-write|nb-select|transform-pipe)\b/ },
     {
       kind: "keyword",
       pattern: /\b(?:define|actor|isolated|shared|private|untrusted|critical|suspends|gen|namespace|module|class|trait|struct|interface|contract|requires|pub|static|fnc|routine|async|await|return|const|mut|val|let|infer|match|over|structural|on|switch|case|select|when|do|done|end|nb|readch|writech|spawn|and|or|as|with|if|fi|else|import|from|type|stop|recover|defer|pure|trap|nlex|gpu|quantum|cancelled|timeout)\b/,
     },
-    // Compound keywords are recognized as a unit; none of these spellings
-    // should be broken into two unrelated identifiers around the hyphen.
-    { kind: "keyword", pattern: /\b(?:critical-read|critical-write|nb-select|transform-pipe)\b/ },
     { kind: "boolean", pattern: /\b(?:true|false)\b/ },
     { kind: "type", pattern: /\b(?:String|string|Int|int|Bool|bool|Float|float|Future|ActorRef|Option|Result|Tuple|Map|List|Set|Symbol|void)\b/ },
     // Hash-prefixed Symbol literals are distinct from annotations and strings.
