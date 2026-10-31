@@ -18,13 +18,70 @@ const baseGrammar = createRegexLanguage({
     { kind: "boolean", pattern: /\b(?:true|false)\b/ },
     { kind: "type", pattern: /\b(?:String|string|Int|int|Bool|bool|Float|float|Future|ActorRef|Option|Result|Tuple|Map|List|Set|Symbol|void)\b/ },
     // Hash-prefixed Symbol literals are distinct from annotations and strings.
-    { kind: "symbol", pattern: /#[A-Za-z_][A-Za-z0-9_]*|@[A-Za-z_]\w*|\b[A-Z][A-Za-z0-9_]*\b/ },
+    { kind: "symbol", pattern: /#[A-Za-z_][A-Za-z0-9_]{0,127}(?![A-Za-z0-9_])|@[A-Za-z_]\w*|\b[A-Z][A-Za-z0-9_]*\b/ },
     // The pinned compiler lexer reserves eq/neq/is (not valid binding identifiers).
     { kind: "operator", pattern: /\b(?:eq|neq|is)\b/ },
     { kind: "operator", pattern: /\b(?:and|or)\b|\.\.\.|->|=>|::|:=|==|!=|<=|>=|\|\||&&|<>|[=+\-*\/<>!?&|%^]/ },
     { kind: "punctuation", pattern: /[{}()[\],;:.]/ },
   ],
 });
+
+// Mirrors the pinned Java lexer/OresSymbol's strict literal admission for
+// highlighting only. Parser/typechecking still require compiler execution.
+function validSymbolName(value) {
+  if (!value || value.length > 1024) return false;
+  for (let i = 0; i < value.length; i++) {
+    const unit = value.charCodeAt(i);
+    if (unit >= 0xd800 && unit <= 0xdbff) {
+      const next = value.charCodeAt(i + 1);
+      if (!(next >= 0xdc00 && next <= 0xdfff)) return false;
+      i++;
+    } else if (unit >= 0xdc00 && unit <= 0xdfff) return false;
+  }
+  const canonical = value.normalize("NFC");
+  if (new TextEncoder().encode(canonical).length > 256) return false;
+  for (const scalar of canonical) {
+    const point = scalar.codePointAt(0);
+    if (point < 0x20 || (point >= 0x7f && point <= 0x9f) ||
+        /[\p{Cf}\p{Zl}\p{Zp}]/u.test(scalar)) return false;
+  }
+  return true;
+}
+
+function readQuotedSymbol(source, start) {
+  const quote = source[start + 1];
+  let end = start + 2;
+  let decoded = "";
+  let invalid = false;
+  let closed = false;
+  while (end < source.length) {
+    if (source[end] === "\n" || source[end] === "\r") break;
+    const character = source[end++];
+    if (character === quote) { closed = true; break; }
+    if (character !== "\\") {
+      decoded += character;
+    } else {
+      if (end >= source.length || source[end] === "\n" || source[end] === "\r") {
+        invalid = true;
+        break;
+      }
+      const escape = source[end++];
+      if (escape === "u") {
+        const digits = source.slice(end, end + 4);
+        if (/^[0-9A-Fa-f]{4}$/.test(digits)) {
+          decoded += String.fromCharCode(parseInt(digits, 16));
+          end += 4;
+        } else invalid = true;
+      } else if (escape === "n") decoded += "\n";
+      else if (escape === "r") decoded += "\r";
+      else if (escape === "t") decoded += "\t";
+      else if (escape === '"' || escape === "'" || escape === "\\") decoded += escape;
+      else invalid = true;
+    }
+    if (decoded.length > 1024) invalid = true;
+  }
+  return { end, valid: closed && !invalid && validSymbolName(decoded) };
+}
 
 // Mask comments and literal bodies before running context-free keyword rules.
 // Oreslang block comments nest; a single lazy regex stops at the inner "*/"
@@ -63,26 +120,9 @@ export const oreslang = {
         }
       } else if (source[cursor] === '#' &&
                  (source[cursor + 1] === '"' || source[cursor + 1] === "'")) {
-        // Quoted Symbols allow spaces and escapes. Treat the entire literal
-        // as a Symbol so the quoted body is never mistaken for a string.
-        kind = 'symbol';
-        const quote = source[cursor + 1];
-        cursor += 2;
-        let closed = false;
-        while (cursor < source.length) {
-          // Quoted Symbol names cannot cross a line boundary. Never consume
-          // the next line of code as part of a malformed quoted Symbol.
-          if (source[cursor] === '\n' || source[cursor] === '\r') break;
-          if (source[cursor] === '\\') {
-            if (source[cursor + 1] === '\n' || source[cursor + 1] === '\r') break;
-            cursor += Math.min(2, source.length - cursor);
-            continue;
-          }
-          if (source[cursor++] === quote) { closed = true; break; }
-        }
-        // The renderer escapes plain text too; an incomplete Symbol must
-        // never be presented as a valid atomic Symbol literal.
-        if (!closed) kind = 'plain';
+        const symbol = readQuotedSymbol(source, cursor);
+        kind = symbol.valid ? 'symbol' : 'plain';
+        cursor = symbol.end;
       } else if (source[cursor] === '"' || source[cursor] === "'" || source[cursor] === '`') {
         kind = 'string';
         const quote = source[cursor++];
