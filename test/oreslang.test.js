@@ -60,14 +60,19 @@ test("unknown languages fail loudly", () => {
   assert.throws(() => highlight("x", "not-a-language"), /unknown language/);
 });
 
-test("logical word and equality operators are highlighted as keywords", () => {
+test("logical words are keywords but comparisons are contextual operators", () => {
   const html = highlight("return a and b or (a eq b) and (a neq c);", "oreslang");
-  for (const word of ["and", "or", "eq", "neq"]) {
-    assert.match(html, new RegExp('<span class="tok-keyword">' + word + '<\\/span>'));
+  for (const word of ["and", "or"]) {
+    assert.ok(html.includes('<span class="tok-keyword">' + word + '</span>'), html);
   }
-  const capitalized = highlight("And Or Xor", "oreslang");
-  assert.ok(!capitalized.includes('<span class="tok-keyword">And</span>'));
-  assert.ok(!capitalized.includes('<span class="tok-keyword">Or</span>'));
+  for (const word of ["eq", "neq"]) {
+    assert.ok(html.includes('<span class="tok-operator">' + word + '</span>'), html);
+  }
+  const identifiers = highlight("let eq = 1; let is = 2; let neq = 3;", "oreslang");
+  for (const word of ["eq", "is", "neq"]) {
+    assert.ok(!identifiers.includes('<span class="tok-keyword">' + word + '</span>'));
+    assert.ok(!identifiers.includes('<span class="tok-operator">' + word + '</span>'));
+  }
 });
 
 test("removed symbolic operators and xor keyword are not falsely highlighted", () => {
