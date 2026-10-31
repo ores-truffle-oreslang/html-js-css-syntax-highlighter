@@ -10,6 +10,7 @@ const baseGrammar = createRegexLanguage({
     // Compound keywords are recognized as a unit; none of these spellings
     // should be broken into two unrelated identifiers around the hyphen.
     { kind: "keyword", pattern: /\b(?:critical-read|critical-write|nb-select|transform-pipe)\b/ },
+    { kind: "runtimeGlobal", pattern: /\b(?:recover|defer|throw|raise)\b/ },
     {
       kind: "keyword",
       pattern: /\b(?:define|actor|isoactor|isolated|shared|private|untrusted|critical|suspends|gen|namespace|module|class|trait|struct|interface|contract|requires|pub|static|fnc|routine|async|await|return|const|mut|val|let|infer|match|over|structural|on|switch|case|select|when|do|done|end|nb|readch|writech|spawn|and|or|as|with|if|fi|else|import|from|type|stop|recover|defer|pure|trap|nlex|cpu|gpu|quantum|panic|null|cancelled|timeout)\b/,
