@@ -22,7 +22,8 @@
   "scripts": {
     "test": "node --test",
     "check": "node --check src/core.js && node --check src/index.js && node --check src/plugins/oreslang.js && node --check src/plugins/html.js && node --check src/plugins/css.js && node --check src/plugins/javascript.js && node --check src/plugins/astro.js && node --check src/adapters/astro.js",
-    "ci": "npm run check && npm test"
+    "ci": "npm run check && npm test",
+    "pack:verify": "node scripts/verify-release-pack.mjs"
   },
   "keywords": [
     "syntax-highlighting",
@@ -32,5 +33,21 @@
     "css",
     "javascript"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "playwright": "1.64.1"
+  },
+  "files": [
+    "src/core.js",
+    "src/index.js",
+    "src/index.d.ts",
+    "src/plugins/astro.js",
+    "src/plugins/css.js",
+    "src/plugins/html.js",
+    "src/plugins/javascript.js",
+    "src/plugins/oreslang.js",
+    "src/plugins/oreslang.d.ts",
+    "src/adapters/astro.js",
+    "src/adapters/astro.d.ts"
+  ]
 }
