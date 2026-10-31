@@ -35,3 +35,12 @@ for(const fixture of contract.fixtures) {
     }
   });
 }
+
+test("every pinned compiler-reserved word receives a lexical token",()=>{
+  for(const word of contract.reservedWords) {
+    const tokens=defaultHighlighter.tokenize(word,"oreslang");
+    assert.equal(tokens.map(t=>t.value).join(""),word);
+    assert.ok(tokens.some(t=>t.value===word && t.kind!=="plain"),
+      "missing pinned reserved word: "+word);
+  }
+});
