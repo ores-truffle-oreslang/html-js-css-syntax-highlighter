@@ -60,20 +60,38 @@ test("unknown languages fail loudly", () => {
   assert.throws(() => highlight("x", "not-a-language"), /unknown language/);
 });
 
-test("logical word and equality operators are highlighted as keywords", () => {
+test("comparison words are reserved operators in pinned compiler lexer", () => {
   const html = highlight("return a and b or (a eq b) and (a neq c);", "oreslang");
-  for (const word of ["and", "or", "eq", "neq"]) {
-    assert.match(html, new RegExp('<span class="tok-keyword">' + word + '<\\/span>'));
+  for (const word of ["and","or"]) {
+    assert.ok(html.includes('<span class="tok-keyword">' + word + '</span>'), html);
   }
-  const capitalized = highlight("And Or Xor", "oreslang");
-  assert.ok(!capitalized.includes('<span class="tok-keyword">And</span>'));
-  assert.ok(!capitalized.includes('<span class="tok-keyword">Or</span>'));
+  for (const word of ["eq","neq"]) {
+    assert.ok(html.includes('<span class="tok-operator">' + word + '</span>'), html);
+  }
+  for (const word of ["eq","is","neq"]) {
+    assert.ok(highlight("let " + word + " = 1", "oreslang")
+      .includes('<span class="tok-operator">' + word + '</span>'));
+  }
 });
 
-test("xor keyword is highlighted independently from capitalized Xor builtin", () => {
-  const html = highlight("return left xor right ^^ extra;", "oreslang");
-  assert.ok(html.includes('<span class="tok-keyword">xor</span>'), html);
-  assert.ok(html.includes('<span class="tok-operator">^^</span>'), html);
-  const builtin = highlight("Xor(true, false)", "oreslang");
-  assert.ok(!builtin.includes('<span class="tok-keyword">Xor</span>'));
+test("lexically recognized percent/caret and legacy words are not silently dropped", () => {
+  const html = highlight("isoactor null panic cpu gpu a % b ^ c", "oreslang");
+  for (const word of ["isoactor","null","panic","cpu","gpu"]) {
+    assert.ok(html.includes('<span class="tok-keyword">' + word + '</span>'), html);
+  }
+  for (const sign of ["%","^"]) {
+    assert.ok(html.includes('<span class="tok-operator">' + sign + '</span>'), html);
+  }
+  assert.ok(!html.includes('<span class="tok-keyword">xor</span>'), html);
+});
+
+test("nested comments and templates cannot leak keywords or markup", () => {
+  const source = '/* outer /* inner */ return; */ define isolated actor Example as `if { return }` end';
+  const tokens = defaultHighlighter.tokenize(source, "oreslang");
+  assert.equal(tokens.map(t => t.value).join(""), source);
+  assert.equal(tokens.filter(t => t.kind === 'comment').length, 1);
+  assert.ok(!tokens.some(t => t.kind === 'keyword' && t.value === 'return'));
+  for (const keyword of ['define', 'isolated', 'actor', 'end']) {
+    assert.ok(tokens.some(t => t.kind === 'keyword' && t.value === keyword), keyword);
+  }
 });
