@@ -68,12 +68,23 @@ function readQuotedSymbol(source, start) {
   let decoded = "";
   let invalid = false;
   let closed = false;
+  // Even after an invalid Symbol, scan to the closing quote/line boundary so
+  // keywords inside the malformed literal cannot leak into the output. Do not
+  // continue accumulating attacker-controlled data beyond the input budget.
+  const appendDecoded = piece => {
+    if (invalid) return;
+    if (decoded.length + piece.length > 1024) {
+      invalid = true;
+      return;
+    }
+    decoded += piece;
+  };
   while (end < source.length) {
     if (source[end] === "\n" || source[end] === "\r") break;
     const character = source[end++];
     if (character === quote) { closed = true; break; }
     if (character !== "\\") {
-      decoded += character;
+      appendDecoded(character);
     } else {
       if (end >= source.length || source[end] === "\n" || source[end] === "\r") {
         invalid = true;
@@ -83,16 +94,15 @@ function readQuotedSymbol(source, start) {
       if (escape === "u") {
         const digits = source.slice(end, end + 4);
         if (/^[0-9A-Fa-f]{4}$/.test(digits)) {
-          decoded += String.fromCharCode(parseInt(digits, 16));
+          appendDecoded(String.fromCharCode(parseInt(digits, 16)));
           end += 4;
         } else invalid = true;
-      } else if (escape === "n") decoded += "\n";
-      else if (escape === "r") decoded += "\r";
-      else if (escape === "t") decoded += "\t";
-      else if (escape === '"' || escape === "'" || escape === "\\") decoded += escape;
+      } else if (escape === "n") appendDecoded("\n");
+      else if (escape === "r") appendDecoded("\r");
+      else if (escape === "t") appendDecoded("\t");
+      else if (escape === '"' || escape === "'" || escape === "\\") appendDecoded(escape);
       else invalid = true;
     }
-    if (decoded.length > 1024) invalid = true;
   }
   return { end, valid: closed && !invalid && validSymbolName(decoded) };
 }
