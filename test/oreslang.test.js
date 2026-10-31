@@ -70,10 +70,22 @@ test("logical word and equality operators are highlighted as keywords", () => {
   assert.ok(!capitalized.includes('<span class="tok-keyword">Or</span>'));
 });
 
-test("xor keyword is highlighted independently from capitalized Xor builtin", () => {
-  const html = highlight("return left xor right ^^ extra;", "oreslang");
-  assert.ok(html.includes('<span class="tok-keyword">xor</span>'), html);
-  assert.ok(html.includes('<span class="tok-operator">^^</span>'), html);
-  const builtin = highlight("Xor(true, false)", "oreslang");
-  assert.ok(!builtin.includes('<span class="tok-keyword">Xor</span>'));
+test("removed symbolic operators and xor keyword are not falsely highlighted", () => {
+  const html = highlight("return Mod(a, b) ^ c % d ^^ x xor z; Xor(true, false)", "oreslang");
+  for (const symbol of ["^", "%", "^^"]) {
+    assert.ok(!html.includes('<span class="tok-operator">' + symbol + '</span>'), html);
+  }
+  assert.ok(!html.includes('<span class="tok-keyword">xor</span>'), html);
+  assert.ok(!html.includes('<span class="tok-keyword">Xor</span>'), html);
+});
+
+test("nested comments and templates cannot leak keywords or markup", () => {
+  const source = '/* outer /* inner */ return; */ define isolated actor Example as `if { return }` end';
+  const tokens = defaultHighlighter.tokenize(source, "oreslang");
+  assert.equal(tokens.map(t => t.value).join(""), source);
+  assert.equal(tokens.filter(t => t.kind === 'comment').length, 1);
+  assert.ok(!tokens.some(t => t.kind === 'keyword' && t.value === 'return'));
+  for (const keyword of ['define', 'isolated', 'actor', 'end']) {
+    assert.ok(tokens.some(t => t.kind === 'keyword' && t.value === keyword), keyword);
+  }
 });

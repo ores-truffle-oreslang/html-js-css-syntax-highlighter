@@ -40,3 +40,11 @@ test("reject invalid aliases before mutating the language registry", () => {
   assert.equal(highlighter.language("custom"), undefined);
   assert.equal(highlighter.language("ok"), undefined);
 });
+
+test("conflicting renderers and malformed regex grammars fail before registration", () => {
+  const h = new SyntaxHighlighter();
+  assert.throws(() => h.use({kind:'renderer',id:'html',render:()=>'<script>'}), /renderer registration conflict/);
+  assert.throws(() => createRegexLanguage({id:'bad',aliases:'alias',tokens:[{pattern:/x/}]}), /valid id/);
+  assert.throws(() => createRegexLanguage({id:'bad',tokens:[null]}), /valid id/);
+  assert.throws(() => createRegexLanguage({id:'bad',tokens:[{pattern:/x/,kind:''}]}), /valid id/);
+});
