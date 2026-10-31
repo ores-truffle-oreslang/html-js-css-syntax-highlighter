@@ -9,6 +9,7 @@ test("shared fixture pins the source lexer and distinguishes future target seman
   assert.equal(corpus.schema, "oreslang.editor-syntax-conformance/v1");
   assert.equal(corpus.authority.repo, "ores-truffle-oreslang/oreslang-source.java");
   assert.equal(corpus.authority.files.length, 2);
+  assert.equal(corpus.cases.length, 50);
   assert.ok(corpus.profiles.compilerMainObservation.reserved.includes("isoactor"));
   assert.ok(corpus.profiles.editorTarget.excludedReservedWords.includes("isoactor"));
   assert.equal(new Set(corpus.cases.map(c => c.id)).size, corpus.cases.length);

@@ -94,5 +94,13 @@ color classes, Symbol boundaries and negative examples.
 The Java compiler's pinned `main` still accepts tokens including `isoactor`,
 `null`, `%` and `^`, which are deliberately excluded by the editor target.
 Keep this discrepancy visible until compiler-backed tests establish migration.
-The weekly `grammar-drift` job checks only public upstream source hashes,
-fails when they change, and **does not auto-apply compiler edits**.
+The shared editor conformance suite now contains **50 adversarial cases**.
+CI checks real HTML token streams, token conservation, and escaping, but
+does not establish parser/guest execution or VS Code/Sublime engine behavior.
+
+**Privacy boundary:** The compiler source repository is private. Public
+workflows may not fetch or mirror its code or pretend unauthenticated raw
+GitHub requests are a reliable drift oracle. The scheduled public watcher
+was removed. Private compiler-side lexical/parser evidence is staged
+separately in oreslang-source.java PR #2350; it has no executed CI steps.
+Merge requires independent review and authentic compiler-backed evidence.
