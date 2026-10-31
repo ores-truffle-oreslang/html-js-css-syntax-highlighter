@@ -47,3 +47,18 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Render untrusted Oreslang in Chromium and verify DOM safety
         run: node browser/browser-smoke.mjs
+
+  release-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22.20.0"
+      - name: Build two byte-identical npm release archives and import extracted package
+        run: npm run pack:verify
