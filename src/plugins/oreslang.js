@@ -40,6 +40,18 @@ function sourceHasInvalidUtf16OrNul(source) {
   return false;
 }
 
+// Match Java's char-based Lexer.isIdentStart/Part for BMP Unicode letters.
+// Regex word boundaries alone are ASCII-oriented in JS: without this guard,
+// e.g. "éreturn" would incorrectly color the suffix as a RETURN keyword.
+function isJavaIdentStartUnit(ch) {
+  return typeof ch === "string" && ch.length === 1 &&
+    (ch === "_" || /\p{L}/u.test(ch));
+}
+function isJavaIdentPartUnit(ch) {
+  return isJavaIdentStartUnit(ch) ||
+    (typeof ch === "string" && ch.length === 1 && /[0-9]/.test(ch));
+}
+
 // Mirrors the pinned Java lexer/OresSymbol's strict literal admission for
 // highlighting only. Parser/typechecking still require compiler execution.
 function validSymbolName(value) {
@@ -167,6 +179,23 @@ export const oreslang = {
           if (source[cursor] === '\\') { cursor += Math.min(2, source.length - cursor); continue; }
           if (source[cursor++] === quote) break;
         }
+      } else if (isJavaIdentStartUnit(source[cursor])) {
+        // Consume whole identifiers first. If they contain a BMP Unicode
+        // letter, preserve them as plain identifiers; ASCII-only names still
+        // go through existing keyword/operator highlighting.
+        let end = cursor + 1;
+        let hasNonAscii = source.charCodeAt(cursor) > 127;
+        while (end < source.length && isJavaIdentPartUnit(source[end])) {
+          if (source.charCodeAt(end) > 127) hasNonAscii = true;
+          end++;
+        }
+        if (hasNonAscii) {
+          emitCode(start);
+          output.push({kind: 'plain', value: source.slice(start, end)});
+          codeStart = end;
+        }
+        cursor = end;
+        continue;
       } else {
         cursor++;
         continue;
