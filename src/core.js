@@ -12,8 +12,13 @@ function sourceOf(pattern) {
 }
 
 export function createRegexLanguage({ id, aliases = [], tokens }) {
-  if (!id || !Array.isArray(tokens) || tokens.length === 0) {
-    throw new TypeError("createRegexLanguage requires an id and at least one token rule");
+  if (typeof id !== "string" || !id || !Array.isArray(aliases) ||
+      aliases.some(name => typeof name !== "string" || !name) ||
+      !Array.isArray(tokens) || tokens.length === 0 ||
+      tokens.some(rule => !rule || typeof rule !== "object" ||
+        !(rule.pattern instanceof RegExp || typeof rule.pattern === "string") ||
+        (rule.kind !== undefined && (typeof rule.kind !== "string" || !rule.kind)))) {
+    throw new TypeError("createRegexLanguage requires valid id, aliases and token rules");
   }
 
   // Flags such as /i and /s belong to each rule. Combining only .source
@@ -132,6 +137,10 @@ export class SyntaxHighlighter {
         throw new TypeError(`renderer plugin "${plugin.id}" must provide render(tokens)`);
       }
 
+      const previous = this.#renderers.get(plugin.id);
+      if (previous && previous !== plugin) {
+        throw new Error(`renderer registration conflict: ${plugin.id}`);
+      }
       this.#renderers.set(plugin.id, plugin);
       return this;
     }

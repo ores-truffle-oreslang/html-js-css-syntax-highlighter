@@ -78,3 +78,7 @@ Consumers own the colors and typography.
 npm test
 npm run check
 ```
+
+## Language security and parity
+
+The Oreslang grammar treats nested `/* ... */` comments and quoted/template literals as opaque spans before applying keyword rules, preventing comment text from masquerading as executable code. Current actor keywords include `isolated`, `critical`, and `suspends`; removed symbolic `%`, `^`, and `^^` operators are not colored as valid Oreslang operators. Rendering escapes HTML, and duplicate renderer registrations fail closed.
