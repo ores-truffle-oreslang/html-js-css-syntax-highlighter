@@ -33,6 +33,22 @@ test('deny green, skipped, or ambiguous backend outcomes without real receipts',
   assert.throws(() => validateAdmission(forged, corpus), /fabricated receipt/);
 });
 
+test('plausible complete GitHub receipt cannot authenticate test-plan PASS', () => {
+  const report=load();
+  const java=report.backends[0];
+  java.lexer='PASS';
+  java.testedHead='a'.repeat(40);
+  java.runUrl='https://github.com/ores-truffle-oreslang/oreslang-source.java/actions/runs/123456';
+  java.executedSteps=9;
+  java.executedCases=34;
+  java.receiptSha256='f'.repeat(64);
+  assert.throws(()=>validateAdmission(report,corpus),
+    /test-plan cannot claim executed PASS\/FAIL evidence/);
+  java.lexer='FAIL';
+  assert.throws(()=>validateAdmission(report,corpus),
+    /test-plan cannot claim executed PASS\/FAIL evidence/);
+});
+
 test('reject missing backends, invalid corpus content, and unsupported without explanation', () => {
   const missing = load();
   missing.backends.pop();
