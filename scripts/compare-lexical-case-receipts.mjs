@@ -100,8 +100,8 @@ export function compareUntrustedLexicalReceipt(corpusBytes, receipt) {
         mismatches.push({id:expected.id,reason:'wrong error classification or diagnostic'});
     } else if (actual.outcome !== 'TOKENS' ||
         JSON.stringify(actual.tokenTypes) !== JSON.stringify(expected.tokenTypes) ||
-        (expected.symbolHex !== '-' &&
-          actual.symbolNameUtf16Hex !== expected.symbolHex)) {
+        actual.symbolNameUtf16Hex !==
+          (expected.symbolHex === '-' ? null : expected.symbolHex)) {
       mismatches.push({id:expected.id,reason:'wrong tokens or normalized Symbol'});
     }
   }
