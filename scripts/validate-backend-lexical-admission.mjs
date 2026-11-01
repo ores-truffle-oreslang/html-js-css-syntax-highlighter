@@ -35,22 +35,16 @@ export function validateAdmission(report, corpusBytes) {
     }
     const claimsExecution = DIMENSIONS.some(d => backend[d] === 'PASS' || backend[d] === 'FAIL');
     const hasUnsupported = DIMENSIONS.some(d => backend[d] === 'UNSUPPORTED');
-    if (claimsExecution) {
-      // Structural minimum, NOT a trusted attestation. Humans/CI must verify
-      // the unforgeable GitHub source SHA and logs independently.
-      if (!SHA40.test(backend.testedHead || '') ||
-          !/^https:\/\/github\.com\/[^/]+\/[^/]+\/actions\/runs\/[1-9][0-9]*$/.test(backend.runUrl || '') ||
-          !Number.isSafeInteger(backend.executedSteps) || backend.executedSteps <= 0 ||
-          !Number.isSafeInteger(backend.executedCases) ||
-          backend.executedCases !== report.expectedCases ||
-          !SHA256.test(backend.receiptSha256 || ''))
-        reject(backend.id + ' cannot claim executed evidence without a full receipt');
-    } else {
-      if (backend.testedHead !== null || backend.runUrl !== null ||
-          backend.executedSteps !== 0 || backend.executedCases !== 0 ||
-          backend.receiptSha256 !== null)
-        reject(backend.id + ' nonexecuted backend carries fabricated receipt fields');
-    }
+    // This file is explicitly a test PLAN, not a signed/verified execution
+    // registry. Even plausible GitHub run URLs and SHA-shaped metadata can be
+    // forged. A PASS/FAIL claim must graduate to a separately verified,
+    // independently authenticated execution-evidence schema.
+    if (claimsExecution)
+      reject(backend.id + ' test-plan cannot claim executed PASS/FAIL evidence');
+    if (backend.testedHead !== null || backend.runUrl !== null ||
+        backend.executedSteps !== 0 || backend.executedCases !== 0 ||
+        backend.receiptSha256 !== null)
+      reject(backend.id + ' nonexecuted backend carries fabricated receipt fields');
     if (hasUnsupported && !(typeof backend.unsupportedReason === 'string' &&
          backend.unsupportedReason.length >= 12))
       reject(backend.id + ' unsupported state needs an explicit reason');
