@@ -42,6 +42,14 @@ test('wrong token, normalized Symbol, error, and actual success are detectable',
   ]);
 });
 
+test('a valid token case cannot smuggle an extra unexpected Symbol payload', () => {
+  const report=synthetic();
+  report.cases.find(x=>x.id==='kw-return').symbolNameUtf16Hex='0061';
+  const result=compareUntrustedLexicalReceipt(corpus,report);
+  assert.equal(result.matchedCases,33);
+  assert.deepEqual(result.mismatches.map(x=>x.id),['kw-return']);
+});
+
 test('reject forged schema, wrong SHA, missing cases, duplicates and ambiguity', () => {
   for(const mutation of [
     r=>{r.schema='other';},
