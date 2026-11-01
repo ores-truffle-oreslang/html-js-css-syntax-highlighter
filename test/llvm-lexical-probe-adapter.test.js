@@ -7,7 +7,7 @@ import { probeLlvmLexicalDriver } from '../scripts/llvm-lexical-probe-adapter.mj
 const bytes=fs.readFileSync(new URL(
   '../contracts/editor-syntax/v1/compiler-lexical-differential-v1.tsv', import.meta.url));
 const syntheticDriver=fileURLToPath(new URL(
-  './fixtures/mock-llvm-lexical-driver.mjs', import.meta.url));
+  '../tools/fixtures/mock-llvm-lexical-driver.mjs', import.meta.url));
 
 test('a real LLVM compiler lacking token-dump protocol cannot be marked passing', () => {
   const result=probeLlvmLexicalDriver({command:process.execPath,corpusBytes:bytes});
