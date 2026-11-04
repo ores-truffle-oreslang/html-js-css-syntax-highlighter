@@ -26,6 +26,32 @@ const baseGrammar = createRegexLanguage({
   ],
 });
 
+function sourceHasInvalidUtf16OrNul(source) {
+  for (let i = 0; i < source.length; i++) {
+    const point = source.charCodeAt(i);
+    if (point === 0) return true;
+    if (point >= 0xd800 && point <= 0xdbff) {
+      const low = source.charCodeAt(++i);
+      if (!(low >= 0xdc00 && low <= 0xdfff)) return true;
+    } else if (point >= 0xdc00 && point <= 0xdfff) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Match Java's char-based Lexer.isIdentStart/Part for BMP Unicode letters.
+// Regex word boundaries alone are ASCII-oriented in JS: without this guard,
+// e.g. "éreturn" would incorrectly color the suffix as a RETURN keyword.
+function isJavaIdentStartUnit(ch) {
+  return typeof ch === "string" && ch.length === 1 &&
+    (ch === "_" || /\p{L}/u.test(ch));
+}
+function isJavaIdentPartUnit(ch) {
+  return isJavaIdentStartUnit(ch) ||
+    (typeof ch === "string" && ch.length === 1 && /[0-9]/.test(ch));
+}
+
 // Mirrors the pinned Java lexer/OresSymbol's strict literal admission for
 // highlighting only. Parser/typechecking still require compiler execution.
 function validSymbolName(value) {
@@ -54,12 +80,23 @@ function readQuotedSymbol(source, start) {
   let decoded = "";
   let invalid = false;
   let closed = false;
+  // Even after an invalid Symbol, scan to the closing quote/line boundary so
+  // keywords inside the malformed literal cannot leak into the output. Do not
+  // continue accumulating attacker-controlled data beyond the input budget.
+  const appendDecoded = piece => {
+    if (invalid) return;
+    if (decoded.length + piece.length > 1024) {
+      invalid = true;
+      return;
+    }
+    decoded += piece;
+  };
   while (end < source.length) {
     if (source[end] === "\n" || source[end] === "\r") break;
     const character = source[end++];
     if (character === quote) { closed = true; break; }
     if (character !== "\\") {
-      decoded += character;
+      appendDecoded(character);
     } else {
       if (end >= source.length || source[end] === "\n" || source[end] === "\r") {
         invalid = true;
@@ -69,16 +106,15 @@ function readQuotedSymbol(source, start) {
       if (escape === "u") {
         const digits = source.slice(end, end + 4);
         if (/^[0-9A-Fa-f]{4}$/.test(digits)) {
-          decoded += String.fromCharCode(parseInt(digits, 16));
+          appendDecoded(String.fromCharCode(parseInt(digits, 16)));
           end += 4;
         } else invalid = true;
-      } else if (escape === "n") decoded += "\n";
-      else if (escape === "r") decoded += "\r";
-      else if (escape === "t") decoded += "\t";
-      else if (escape === '"' || escape === "'" || escape === "\\") decoded += escape;
+      } else if (escape === "n") appendDecoded("\n");
+      else if (escape === "r") appendDecoded("\r");
+      else if (escape === "t") appendDecoded("\t");
+      else if (escape === '"' || escape === "'" || escape === "\\") appendDecoded(escape);
       else invalid = true;
     }
-    if (decoded.length > 1024) invalid = true;
   }
   return { end, valid: closed && !invalid && validSymbolName(decoded) };
 }
@@ -90,6 +126,12 @@ export const oreslang = {
   ...baseGrammar,
   tokenize(input) {
     const source = String(input);
+    // The native lexer rejects these malformed host strings even inside
+    // otherwise opaque comments/templates. Preserve source losslessly, but
+    // never present it as valid program or Symbol syntax.
+    if (sourceHasInvalidUtf16OrNul(source)) {
+      return [{kind: 'plain', value: source}];
+    }
     const output = [];
     let cursor = 0;
     let codeStart = 0;
@@ -114,7 +156,14 @@ export const oreslang = {
         cursor += 2;
         let depth = 1;
         while (cursor < source.length && depth > 0) {
-          if (source.startsWith('/*', cursor)) { depth++; cursor += 2; }
+          if (source.startsWith('/*', cursor)) {
+            if (++depth > 4_096) {
+              // Match the bounded native lexer: do not color the remainder
+              // as valid code after an excessive nesting depth.
+              return [{kind: 'plain', value: source}];
+            }
+            cursor += 2;
+          }
           else if (source.startsWith('*/', cursor)) { depth--; cursor += 2; }
           else cursor++;
         }
@@ -130,6 +179,23 @@ export const oreslang = {
           if (source[cursor] === '\\') { cursor += Math.min(2, source.length - cursor); continue; }
           if (source[cursor++] === quote) break;
         }
+      } else if (isJavaIdentStartUnit(source[cursor])) {
+        // Consume whole identifiers first. If they contain a BMP Unicode
+        // letter, preserve them as plain identifiers; ASCII-only names still
+        // go through existing keyword/operator highlighting.
+        let end = cursor + 1;
+        let hasNonAscii = source.charCodeAt(cursor) > 127;
+        while (end < source.length && isJavaIdentPartUnit(source[end])) {
+          if (source.charCodeAt(end) > 127) hasNonAscii = true;
+          end++;
+        }
+        if (hasNonAscii) {
+          emitCode(start);
+          output.push({kind: 'plain', value: source.slice(start, end)});
+          codeStart = end;
+        }
+        cursor = end;
+        continue;
       } else {
         cursor++;
         continue;
