@@ -25,3 +25,43 @@ jobs:
           test "$(git hash-object tests/verify-editor-lexical-v1.mjs)" = 336d5429af432ff78bb4012acb35b3f2109a4e3b
           node --test tests/verify-editor-lexical-v1.mjs
       - run: npm run ci
+      - name: Validate compiler source pins offline
+        run: node scripts/check-upstream-syntax.mjs
+
+
+  browser-dom:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22.20.0"
+      - name: Install pinned Playwright dependency
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Install Chromium for real browser execution
+        run: npx playwright install --with-deps chromium
+      - name: Render untrusted Oreslang in Chromium and verify DOM safety
+        run: node browser/browser-smoke.mjs
+
+  release-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22.20.0"
+      - name: Install exact public dependencies from committed lockfile
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Build two byte-identical npm release archives and import extracted package
+        run: npm run pack:verify
+
