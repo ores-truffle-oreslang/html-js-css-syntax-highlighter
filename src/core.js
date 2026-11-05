@@ -118,11 +118,6 @@ export class SyntaxHighlighter {
 
       // Fail closed on conflicting IDs/aliases: a later plugin must not
       // silently replace the grammar already trusted for a language.
-      // Reject iterable-but-not-array aliases: a string such as "alias"
-      // otherwise registers five unrelated one-character language IDs.
-      if (!Array.isArray(plugin.aliases ?? [])) {
-        throw new TypeError("language aliases must be an array");
-      }
       const names = [plugin.id, ...(plugin.aliases ?? [])];
       if (names.some(name => typeof name !== "string" || name.length === 0)) {
         throw new TypeError("language ids and aliases must be non-empty strings");
