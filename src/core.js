@@ -24,7 +24,9 @@ export function createRegexLanguage({ id, aliases = [], tokens }) {
   // Flags such as /i and /s belong to each rule. Combining only .source
   // into one expression discarded them (or would make every rule insensitive).
   const rules = tokens.map((rule) => ({
-    rule,
+    // Snapshot category with compiled regex; mutating caller rules must not
+    // silently change a registered grammar after construction.
+    kind: rule.kind ?? 'plain',
     expression: new RegExp(sourceOf(rule.pattern),
       `gm${rule.pattern instanceof RegExp && rule.pattern.unicodeSets ? 'v' : 'u'}`
       + (rule.pattern instanceof RegExp && rule.pattern.ignoreCase ? 'i' : '')
@@ -64,7 +66,7 @@ export function createRegexLanguage({ id, aliases = [], tokens }) {
         const match = matches[chosen];
         const index = match.index;
         if (index > cursor) output.push({ kind: 'plain', value: value.slice(cursor, index) });
-        output.push({ kind: rules[chosen].rule.kind ?? 'plain', value: match[0] });
+        output.push({ kind: rules[chosen].kind, value: match[0] });
         cursor = index + match[0].length;
         for (let i = 0; i < matches.length; i++) {
           if (matches[i] && matches[i].index < cursor) matches[i] = nextMatch(rules[i], cursor);
