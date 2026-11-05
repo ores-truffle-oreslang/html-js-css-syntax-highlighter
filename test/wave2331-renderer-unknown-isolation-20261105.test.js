@@ -1,7 +1,7 @@
 // Host highlighter side-effect boundary, not native guest compiler proof.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {SyntaxHighlighter,escapeHtml} from '../src/core.js';
+import {SyntaxHighlighter,escapeHtml,htmlRenderer} from '../src/core.js';
 
 test('unknown renderer is rejected before third-party tokenizer can run',()=>{
   let tokenizations=0;
@@ -10,7 +10,7 @@ test('unknown renderer is rejected before third-party tokenizer can run',()=>{
     tokenize(code){tokenizations++;return [{kind:'plain',value:code}];}};
   const customRenderer={kind:'renderer',id:'observed',
     render(tokens){customRenders++;return tokens.map(t=>t.value).join('');}};
-  const highlighter=new SyntaxHighlighter({languages:[language],renderers:[customRenderer]});
+  const highlighter=new SyntaxHighlighter({languages:[language],renderers:[htmlRenderer,customRenderer]});
   for(let i=0;i<4;i++){
     assert.throws(()=>highlighter.highlight('untrusted<&"',language.id,{renderer:'missing'}),
       /unknown renderer/);
