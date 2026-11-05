@@ -36,7 +36,8 @@ export function createRegexLanguage({ id, aliases = [], tokens }) {
   return {
     kind: "language",
     id,
-    aliases,
+    // Registration aliases have the same construction-time identity as compiled rules.
+    aliases: [...aliases],
     tokenize(code) {
       const value = String(code);
       const output = [];
