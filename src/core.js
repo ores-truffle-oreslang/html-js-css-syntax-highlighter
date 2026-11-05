@@ -107,7 +107,8 @@ export class SyntaxHighlighter {
   }
 
   use(plugin) {
-    if (!plugin || !plugin.kind || !plugin.id) {
+    if (!plugin || typeof plugin.kind !== "string" || !plugin.kind ||
+        typeof plugin.id !== "string" || !plugin.id) {
       throw new TypeError("plugins require kind and id");
     }
 
