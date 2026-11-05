@@ -19,7 +19,7 @@ test('repeated highlighter scans conserve Unicode and escaped HTML without stale
     layer = layer.flatMap(prefix => units.map(unit => prefix + unit));
     values.push(...layer);
   }
-  assert.equal(values.length, 260);
+  assert.equal(values.length, 262);
   for (const value of values) {
     supplied.lastIndex = 97;
     const first = highlighter.tokenize(value, 'wave1711-source');
