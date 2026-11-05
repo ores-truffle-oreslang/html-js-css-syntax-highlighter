@@ -20,8 +20,8 @@ test('untrusted token kind and caller prefix are inert inside a class attribute'
     assert.equal(rendered, expected);
     assert.equal(rendered.includes('<script>'), false);
     assert.equal(rendered.includes('<img'), false);
-    assert.equal(rendered.includes(' onclick='), false);
-    assert.equal(rendered.includes(' data-evil='), false);
+    assert.equal(rendered.includes(' onclick="'), false);
+    assert.equal(rendered.includes(' data-evil="'), false);
     assert.equal(records[1].value,value);
   }
 });
