@@ -13,9 +13,9 @@ function sourceOf(pattern) {
 
 export function createRegexLanguage({ id, aliases = [], tokens }) {
   if (typeof id !== "string" || !id || !Array.isArray(aliases) ||
-      aliases.some(name => typeof name !== "string" || !name) ||
+      Array.from(aliases).some(name => typeof name !== "string" || !name) ||
       !Array.isArray(tokens) || tokens.length === 0 ||
-      tokens.some(rule => !rule || typeof rule !== "object" ||
+      Array.from(tokens).some(rule => !rule || typeof rule !== "object" ||
         !(rule.pattern instanceof RegExp || typeof rule.pattern === "string") ||
         (rule.kind !== undefined && (typeof rule.kind !== "string" || !rule.kind)))) {
     throw new TypeError("createRegexLanguage requires valid id, aliases and token rules");
