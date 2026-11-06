@@ -2,7 +2,7 @@ import { createRegexLanguage } from "../core.js";
 
 const baseGrammar = createRegexLanguage({
   id: "oreslang",
-  aliases: ["ores", "ores-lang"],
+  aliases: ["ores", "ores-lang", "atto", "attolang", "atto-lang"],
   tokens: [
     { kind: "comment", pattern: /\/\/[^\n]*|\/\*[\s\S]*?\*\// },
     { kind: "string", pattern: /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`/ },
