@@ -6,7 +6,7 @@ test('JavaScript built-in aliases share the same grammar and preserve opaque lex
   const source = '// return async false\r\nconst rendered = "<script>return</script>"; /* await */ function hello() { return `throw`; }';
   const canonical = javascript.tokenize(source);
   assert.deepEqual(canonical.filter(t => t.kind === 'comment').map(t => t.value),
-    ['// return async false\\r', '/* await */']);
+    ['// return async false\r', '/* await */']);
   assert.deepEqual(canonical.filter(t => t.kind === 'string').map(t => t.value),
     ['"<script>return</script>"', '`throw`']);
   assert.deepEqual(canonical.filter(t => t.kind === 'keyword').map(t => t.value),
