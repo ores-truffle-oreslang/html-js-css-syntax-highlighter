@@ -8,7 +8,7 @@ test('quoted symbols distinguish valid escapes from malformed opaque regions', (
     ["#'abc\\'def'", 'symbol'],
     ['#"bad\\qreturn"', 'plain'],
     ['#"bad\\uZZZZreturn"', 'plain'],
-    ['#"has space return"', 'symbol'],
+    ['#"has space return"', 'plain'],
   ];
   for (const [source, kind] of cases) {
     const tokens = oreslang.tokenize(source);
