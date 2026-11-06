@@ -22,7 +22,7 @@ test('independent ignoreCase and dotAll rule flags retain leftmost precedence', 
     ['case', 'Ab'], ['plain', '|'], ['dot', 'x\ny'],
     ['plain', '|'], ['case', 'AB'], ['plain', '|'],
     ['case', 'ab'], ['plain', '|'], ['dot', 'xzy'],
-    ['plain', '|x\r\ny'],
+    ['plain', '|'], ['dot', 'x\r\n'], ['plain', 'y'],
   ];
   for (let iteration = 0; iteration < 5; iteration++) {
     const actual = language.tokenize(input);
