@@ -37,7 +37,7 @@ test('overlapping, empty-lookahead and astral rules agree with independent oracl
     id:'wave2045-literal',
     tokens:[
       {kind:'pair',pattern:pair},
-      {kind:'single',pattern:/a/},
+      {kind:'single',pattern:single},
       {kind:'astral',pattern:astral},
       {kind:'line',pattern:line},
       {kind:'zero',pattern:zero},
