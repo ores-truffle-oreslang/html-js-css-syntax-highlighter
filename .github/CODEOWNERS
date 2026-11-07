@@ -1,0 +1,8 @@
+# Highlighter code-owner review policy. GitHub enforcement also requires main branch protection.
+* @ORESoftware
+/.github/ @ORESoftware
+/src/ @ORESoftware
+/test/ @ORESoftware
+/scripts/ @ORESoftware
+/package.json @ORESoftware
+/package-lock.json @ORESoftware
