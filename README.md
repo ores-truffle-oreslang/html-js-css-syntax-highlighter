@@ -112,3 +112,13 @@ Merge requires independent review and authentic compiler-backed evidence.
 ## Separate current and target language profiles
 
 `src/plugins/oreslang.js` is the default compiler-current highlighter; this is the only Oreslang plugin registered by default. `src/plugins/oreslang-target-preview.js` exports an explicitly unregistered `oreslangPreview` for 50-case proposed-language conformance tests. It is **not** proof of current compiler or guest acceptance. Browser HTML safety tests run on the default; preview fixtures run on the preview tokenizer. Promotion requires private compiler evidence and independent review.
+
+## Repository ownership and legacy-exit decision (2026-11-08)
+
+**Current home:** `ores-truffle-oreslang/html-js-css-syntax-highlighter`. **Status: EXPLICIT HOLD — not an approved transfer.** The language's current public name is **AttoLang**; preserve the old `oreslang-*` namespace and `.ores` compatibility where applicable. Do not rename or transfer this repo on the basis of a branding change.
+
+- **Belongs here:** independent HTML/JS/CSS highlighting utilities and portability tests.
+- **Does not belong here:** AttoLang normative grammar, runtime or cloud hosted deployment.
+- **Organizational boundaries:** [atto-lang](https://github.com/atto-lang) is for the AttoLang language, compilers, ecosystem tools and portable libraries; [atto-co](https://github.com/atto-co) independently governs hosted commercial infrastructure. This is a **legacy hold**, not a default permanent home and not a direct `atto-co` candidate. Similarly named repositories in destination organizations are distinct Git identities unless proven transferred.
+
+**Required next decision:** a named source owner and independent reviewer must explicitly select **(a) approved transfer, (b) archive, or (c) time-bounded compatibility exception with review date**, as defined in the private [migration plan #25](https://github.com/ores-truffle-oreslang/.github/pull/25). Record the decision, exact source HEAD SHA/tree, numeric ID, branch/ruleset protections, release/PR history, package and Pages consumers, GitHub Apps, secrets, Actions runners, webhooks, visibility and rollback in [coordination issue #26](https://github.com/ores-truffle-oreslang/.github/issues/26). No private source mirror, automatic renaming or unapproved org transfer. If transfer is later approved, preserve GitHub ID/history and check destination access/CI, with nonzero executed steps; `steps=[]`/`null` is `NOT_EXECUTED`. Keep any Pages redirects and external links explicit and independently checked.
