@@ -21,7 +21,7 @@ const baseGrammar = createRegexLanguage({
     { kind: "symbol", pattern: /#[A-Za-z_][A-Za-z0-9_]{0,127}(?![A-Za-z0-9_])|@[A-Za-z_]\w*|\b[A-Z][A-Za-z0-9_]*\b/ },
     // The pinned compiler lexer reserves eq/neq/is (not valid binding identifiers).
     { kind: "operator", pattern: /\b(?:eq|neq|is)\b/ },
-    { kind: "operator", pattern: /\b(?:and|or)\b|\.\.\.|->|=>|::|:=|==|!=|<=|>=|\|\||&&|<>|[=+\-*\/<>!?&|%^]/ },
+    { kind: "operator", pattern: /\b(?:and|or)\b|\.\.\.|->|=>|::|:=|==|!=|<=|>=|\|\||&&|<>|[=+\-*\/<>!?&|%^~]/ },
     { kind: "punctuation", pattern: /[{}()[\],;:.]/ },
   ],
 });

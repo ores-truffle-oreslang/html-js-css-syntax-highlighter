@@ -5,7 +5,7 @@ import { defaultHighlighter, highlight } from "../src/index.js";
 import { highlightForAstro } from "../src/adapters/astro.js";
 
 const sample = `match account over
-  on structural {id: string, active: bool} a -> {
+  on ~ {id: string, active: bool} as a -> {
     return a.id;
   }
   on _ -> {
@@ -17,10 +17,18 @@ test("Oreslang marks over and end as keywords", () => {
   const html = highlight(sample, "oreslang");
 
   assert.match(html, /<span class="tok-keyword">over<\/span>/);
-  assert.match(html, /<span class="tok-keyword">structural<\/span>/);
+  assert.match(html, /<span class="tok-operator">~<\/span>/);
+  assert.match(html, /<span class="tok-keyword">as<\/span>/);
   assert.match(html, /<span class="tok-keyword">end<\/span>/);
   assert.match(html, /<span class="tok-keyword">match<\/span>/);
   assert.match(html, /<span class="tok-keyword">on<\/span>/);
+});
+
+
+test("long-form structural remains a keyword with explicit as binder", () => {
+  const html = highlight("on structural {id: string} as a -> {}", "oreslang");
+  assert.match(html, /<span class="tok-keyword">structural<\/span>/);
+  assert.match(html, /<span class="tok-keyword">as<\/span>/);
 });
 
 test("static fnc is highlighted, without matching keyword prefixes inside identifiers", () => {
